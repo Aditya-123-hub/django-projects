@@ -85,7 +85,7 @@ django-projects/ # Root folder
 ## 💻 Installation
 
 1. **Clone the repository**
-git clone https://github.com/yourusername/django-projects.git
+git clone https://github.com/Aditya-123-hub/django-projects.git
 cd django-projects
 
 2. **Create & activate virtual environment**

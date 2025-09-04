@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Payment Receipt</h1>
+    <p>Product: {{ order.product.name }}</p>
+    <p>Amount Paid: ₹{{ order.amount }}</p>
+    <p>Payment ID: {{ order.razorpay_payment_id }}</p>
+    <p>Order ID: {{ order.razorpay_order_id }}</p>
+    <p>Date: {{ order.created_at }}</p>
+</body>
+</html>

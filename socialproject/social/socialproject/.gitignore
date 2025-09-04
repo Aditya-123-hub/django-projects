@@ -1,0 +1,29 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+
+# Environments
+.env
+venv/
+.venv/
+
+# Static
+staticfiles/
+
+# Node / Frontend
+node_modules/
+package-lock.json
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Extra
+structure.txt
+

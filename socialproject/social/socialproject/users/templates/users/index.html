@@ -1,0 +1,70 @@
+{% extends 'users/base.html' %}
+{% load static %} 
+{% block body %}
+
+<div class="flex justify-center mt-8">
+  <h2 class="text-3xl font-semibold text-purple-600">My Posts</h2>
+</div>
+
+<div class="flex flex-col items-center space-y-10 p-8">
+  {% for post in posts %}
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden w-full max-w-md transition-transform transform hover:scale-[1.02] hover:shadow-2xl animate-slide-up">
+
+    <!-- user info centered -->
+    <div class="flex flex-col items-center px-4 py-4 border-b">
+      <img class="w-16 h-16 rounded-full object-cover border-2 border-purple-400" src="{{ profile.photo.url }}"
+        alt="{{ user.username }}">
+      <p class="flex font-semibold mt-2 text-gray-800">{{ user.username }}</p>
+      <p class="text-gray-500 text-sm">{{ post.created_at|date:"M d, Y" }}</p>
+    </div>
+
+    <!-- post image -->
+    <div class="w-full h-[100px] flex justify-center items-center bg-gray-100">
+      <img src="{{ post.image.url }}" alt="Post Image"
+        class="max-h-full max-w-full object-cover transition-transform duration-500 ease-in-out transform hover:scale-105">
+    </div>
+
+    <!-- post actions -->
+    <div class="flex justify-center items-center space-x-12 px-4 py-3 border-t text-gray-500">
+      <!-- Like Icon -->
+      <img src="{% static 'users/images/white.png' %}" alt="Like" class="w-6 h-6 cursor-pointer hover:scale-110 transition-transform">
+
+      <!-- Comment Icon -->
+      <img src="{% static 'users/images/comment.png' %}" alt="Comment" class="w-6 h-6 cursor-pointer hover:scale-110 transition-transform">
+
+      <!-- Share Icon -->
+      <img src="{% static 'users/images/share.png' %}" alt="Share" class="w-6 h-6 cursor-pointer hover:scale-110 transition-transform">
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="fixed bottom-0 left-0 w-full bg-white border-t shadow-lg">
+  <div class="max-w-4xl mx-auto flex items-center justify-around p-3">
+    
+    <!-- Home Button -->
+    <a href="{% url 'feed' %}" class="flex flex-col items-center text-gray-600 hover:text-blue-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 9.75L12 3l9 6.75V21a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 21V9.75z"/>
+      </svg>
+      <span class="text-xs">Go to feed</span>
+    </a>
+{% endif %}
+
+<!-- Slide-up animation -->
+<style>
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slide-up 0.6s ease forwards;
+}
+</style>
+
+{% endblock %}
+

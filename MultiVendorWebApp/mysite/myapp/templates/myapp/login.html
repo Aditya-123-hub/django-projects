@@ -1,0 +1,46 @@
+{% extends 'myapp/base.html' %}
+{% load widget_tweaks %}
+{% block body %}
+<div class="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-100">
+
+    <!-- Heading -->
+    <h1 class="font-bold text-3xl text-gray-800 mb-8 tracking-wide">
+        🔏 Login
+    </h1>
+
+    <!-- Form Container -->
+    <form class="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-md space-y-6 border border-gray-100" method="POST">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Username</label>
+            {{ form.username|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 ease-in-out" }}
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Password</label>
+            {{ form.password|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition duration-200 ease-in-out" }}
+        </div>
+
+        <!-- Remember Me / Extra Optional -->
+        <div class="flex items-center mb-4">
+            <input type="checkbox" id="remember" class="h-4 w-4 text-green-500 focus:ring-green-400 border-gray-300 rounded">
+            <label for="remember" class="ml-2 block text-gray-600">Remember me</label>
+        </div>
+
+        <!-- Button -->
+        <button
+            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300"
+            type="submit">
+            ✅ Login
+        </button>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500 mt-2 text-sm">
+            Don't have an account? <a href="{% url 'register' %}" class="text-green-600 hover:underline">Register</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

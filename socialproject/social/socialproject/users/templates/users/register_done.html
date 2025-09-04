@@ -1,0 +1,22 @@
+{% extends 'users/base.html' %}
+{% block body %}
+<div class="flex justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div class="bg-white shadow-2xl rounded-2xl p-10 text-center w-[400px] transform transition duration-500 hover:scale-105">
+        <h1 class="text-3xl font-bold text-indigo-600 mb-3 animate__animated animate__fadeInDown">
+            🎉 Registration Successful!
+        </h1>
+        <p class="text-lg text-gray-700 mb-6 animate__animated animate__fadeInUp">
+            Welcome, <span class="font-semibold text-indigo-500">{{ new_user.first_name }}</span> 👋
+        </p>
+        <p class="text-gray-500 mb-6">We’re excited to have you on board. Start exploring your new account now 🚀</p>
+        
+        <a href="{% url 'login' %}" 
+           class="bg-indigo-500 text-white px-6 py-2 rounded-full shadow-md hover:bg-indigo-600 transition duration-300 ease-in-out">
+            Go to Login
+        </a>
+    </div>
+</div>
+
+<!-- Animate.css link (agar base.html me nhi dala to add kar lena) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock %}

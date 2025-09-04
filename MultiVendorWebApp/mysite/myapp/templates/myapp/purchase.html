@@ -1,0 +1,51 @@
+{% extends 'myapp/base.html' %}
+{% block body %}
+<div class="flex justify-between items-center px-12 py-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-b-2xl shadow-lg">
+    <div class="text-3xl font-extrabold text-white tracking-wide">📦 My Purchases</div>
+    <div>
+        <a class="bg-white text-indigo-600 font-semibold px-5 py-3 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+           href="{% url 'createproduct' %}">
+           ➕ Create New Product
+        </a>
+    </div>
+</div>
+
+<div class="order-container shadow-lg p-10 m-5">
+   <div class="order-header font-bold flex mt-5 py-2">
+     <div class="w-1/4">
+            Product name
+        </div>
+        <div class="w-1/4">
+            Amount Paid
+        </div>
+        <div class="w-1/4">
+            Order Date
+        </div>
+        <div class="w-1/4">
+            Download Link
+        </div>
+
+   </div>
+     {% for order in orders %}
+    <div class="flex mt-5 p-2">
+        <div class="w-1/4">
+            {{ order.product.name }}<br>and purchased by {{ order.customer_email }}
+        </div>
+        <div class="w-1/4">
+            {{ order.amount }}
+        </div>
+        <div class="w-1/4">
+            {{ order.created_at }}
+        </div>
+        <!-- <div class="w-1/5">
+            {{ order.razorpay_order_id }}
+        </div> -->
+        <div class="w-1/4">
+            <a class="bg-green-500 text-white px-4 py-2" href="{{ order.product.file.url }}" download>Click here to download</a>
+        </div>
+        
+      
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

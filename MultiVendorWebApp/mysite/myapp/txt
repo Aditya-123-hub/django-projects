@@ -1,0 +1,180 @@
+from django.shortcuts import render,get_object_or_404,redirect
+from .models import Product,OrderDetail
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+import razorpay,json
+from django.http import JsonResponse,HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from .forms import ProductForm,UserRegistrationForm
+# Create your views here.
+
+def index(request):
+    products=Product.objects.all()
+
+    return render(request,'myapp/index.html',{'products':products})
+
+def detail(request,id):
+    product=Product.objects.get(id=id)
+    razorpay_key_id=settings.RAZORPAY_KEY_ID
+    return render(request,'myapp/detail.html',{'product':product,'razorpay_key_id':razorpay_key_id})
+
+
+
+@csrf_exempt
+def create_checkout_session(request, id):
+    if request.method == "POST":
+        product = get_object_or_404(Product, id=id)
+        
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        order_amount = int(product.price * 100)
+        order_currency = "INR"
+        order_receipt = f"order_rcptid_{product.id}"
+        order = client.order.create({
+            "amount": order_amount,
+            "currency": order_currency,
+            "receipt": order_receipt,
+            "payment_capture": 1
+        })
+        order_detail = OrderDetail.objects.create(
+            product=product,
+            customer_email=request.user.email,
+            razorpay_order_id=order['id'],
+            amount=product.price,
+            currency=order_currency,
+            payment_status="created"
+        )
+        return JsonResponse({
+            "order_id": order["id"],
+            "amount": order_amount,
+            "currency": order_currency,
+            "product": product.name,
+            "key": settings.RAZORPAY_KEY_ID
+        })
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@csrf_exempt
+def payment_handler(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        razorpay_order_id = data.get("razorpay_order_id")
+        razorpay_payment_id = data.get("razorpay_payment_id")
+        razorpay_signature = data.get("razorpay_signature")
+
+        order_detail = get_object_or_404(OrderDetail, razorpay_order_id=razorpay_order_id)
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+
+        try:
+            client.utility.verify_payment_signature(params_dict)
+            order_detail.payment_status = "paid"
+            order_detail.razorpay_payment_id = razorpay_payment_id
+            order_detail.save()
+            return JsonResponse({"status": "success"})
+        except razorpay.errors.SignatureVerificationError:
+            order_detail.payment_status = "failed"
+            order_detail.save()
+            return JsonResponse({"status": "failure"}, status=400)
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def payment_success(request):
+    # Razorpay_order_id ko GET param ke through bhej sakte ho
+    order_id = request.GET.get('order_id')
+    order = get_object_or_404(OrderDetail, razorpay_order_id=order_id)
+    order.has_pad=True
+    product=Product.objects.get(id=order.product.id)
+    product.total_sales_amount=product.total_sales_amount+int(product.price)
+    product.total_sales=product.total_sales+1
+    product.save()
+
+    order.save()
+    return render(request, "myapp/success.html", {"order": order})
+
+def payment_failure(request):
+    return render(request, "myapp/failure.html")
+
+
+def download_receipt(request, order_id):
+    order = get_object_or_404(OrderDetail, id=order_id)
+    html = render_to_string("myapp/receipt.html", {"order": order})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{order.razorpay_payment_id}.pdf"'
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse("Error generating PDF")
+    return response
+
+def create_product(request):
+    if request.method=="POST":
+        product_form=ProductForm(data=request.POST,files=request.FILES)
+        if product_form.is_valid():
+            new_product=product_form.save(commit=False)
+            new_product.seller=request.user
+            new_product.save()
+            return redirect('index')
+        
+    product_form=ProductForm()    
+    return render(request,'myapp/create_product.html',{'product_form':product_form})
+
+def edit_product(request,id):
+        product=Product.objects.get(id=id)
+        if product.seller!=request.user:
+            return redirect('invalid')
+        product_form=ProductForm(data=request.POST or None,files=request.FILES or None,instance=product)
+        if request.method=="POST":
+            if product_form.is_valid():
+                product_form.save()
+                return redirect('index')
+          
+        return render(request,'myapp/edit_product.html',{'product_form':product_form,'product':product})
+
+
+def delete(request,id):
+    product=Product.objects.get(id=id)
+    if product.seller!=request.user:
+        return redirect('invalid')
+    if request.method=="POST":
+        product.delete()
+        return redirect('index')
+    return render(request,'myapp/delete.html',{'product':product})
+
+def dashboard(request):
+    products= Product.objects.filter(seller=request.user)
+    return render(request,'myapp/dashboard.html',{'products':products}) 
+
+def register(request):
+    if request.method == "POST":
+        user_form = UserRegistrationForm(data=request.POST)
+        if user_form.is_valid():
+            new_user = user_form.save(commit=False)
+            new_user.set_password(user_form.cleaned_data['password'])  # use 'password'
+            new_user.save()
+            return redirect('index')
+    else:
+        user_form = UserRegistrationForm()
+    return render(request, 'myapp/register.html', {'user_form': user_form})
+
+
+def invalid(request):
+    return render(request,'myapp/invalid.html')
+
+def my_purchases(request):
+    print("User:", request.user)  # check user
+    print("Email:", request.user.email)  # check email
+    orders=OrderDetail.objects.all()
+    return render(request,'myapp/purchase.html',{'orders':orders})
+
+
+
+
+
+
+
+
+
+

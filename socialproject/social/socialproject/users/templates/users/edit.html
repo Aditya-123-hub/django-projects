@@ -1,0 +1,49 @@
+{% extends 'users/base.html' %}
+{% block body %}
+
+<div class="flex flex-col items-center mt-10">
+  <h1 class="text-3xl font-semibold text-purple-600 mb-2">Welcome {{ user.username }}</h1>
+  <h3 class="text-xl text-gray-700 mb-6">Edit Your Profile</h3>
+
+  <form method="POST" enctype="multipart/form-data" class="bg-white shadow-lg rounded-2xl w-full max-w-md p-8 space-y-6">
+    {% csrf_token %}
+
+    <!-- User form fields -->
+    <div class="space-y-4">
+      {% for field in user_form %}
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" value="{{ field.value }}" 
+                 class="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-400">
+          {% if field.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ field.errors }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Profile form fields -->
+    <div class="space-y-4">
+      {% for field in profile_form %}
+        <div class="flex flex-col">
+          <label class="text-gray-700 font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% if field.field.widget.input_type == "file" %}
+            {{ field }}
+          {% else %}
+            <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" value="{{ field.value }}"
+                   class="border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-400">
+          {% endif %}
+          {% if field.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ field.errors }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition duration-200">
+      Save Changes
+    </button>
+  </form>
+</div>
+
+{% endblock %}

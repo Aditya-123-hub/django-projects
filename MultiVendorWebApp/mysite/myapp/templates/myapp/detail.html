@@ -1,0 +1,18 @@
+{% extends 'myapp/base.html' %}
+{% block body %}
+<div class="flex p-10">
+    <div>
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    </div>
+    <div class="p-10">
+        <div class="text-4xl mb-4">{{ product.name }}</div>
+        <div class="mb-4">{{ product.description }}</div>
+        <div class="mb-4 text-green-700 font-bold">₹{{ product.price }}</div>
+        <div>
+            <a href="{% url 'instamojo_checkout' product.id %}" class="bg-green-500 text-white px-4 py-2 rounded-sm">
+                Pay with Instamojo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

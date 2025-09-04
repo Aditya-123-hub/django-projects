@@ -1,0 +1,52 @@
+{% extends 'myapp/base.html' %}
+{% block body %}
+<div class="flex justify-between items-center border-b pb-4 mb-6">
+    <div class="ml-10 mt-6 font-bold text-2xl text-gray-800">Sales Stats</div>
+    <div class="mr-10 mt-6">
+        <a class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow" href="{% url 'dashboard' %}">Dashboard</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-10">
+    <!-- Total Sales -->
+    <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Total Sales</h2>
+        <p class="text-2xl font-bold text-green-600 mt-2">${{ total_sales.amount__sum }}</p>
+    </div>
+
+    <!-- Yearly Sales -->
+    <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Yearly Sales</h2>
+        <p class="text-2xl font-bold text-blue-600 mt-2">${{ yearly_sales.amount__sum }}</p>
+    </div>
+
+    <!-- Monthly Sales -->
+    <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Monthly Sales</h2>
+        <p class="text-2xl font-bold text-purple-600 mt-2">${{ monthly_sales.amount__sum }}</p>
+    </div>
+
+    <!-- Weekly Sales -->
+    <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Weekly Sales</h2>
+        <p class="text-2xl font-bold text-orange-600 mt-2">${{ weekly_sales.amount__sum }}</p>
+    </div>
+
+    <!-- Daily sales (working) -->
+     {% for a in daily_sums %}
+      <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Daily Sales</h2>
+        <p class="text-2xl font-bold text-orange-600 mt-2">{{ a.created_at__date }}--> ${{ a.sum }}</p>
+    </div>
+     {% endfor %}
+
+    <!-- product sales sum cumalative -->
+     {% for sums in product_sales_sums %}
+     <div class="shadow-lg rounded-lg p-6 bg-white text-center">
+        <h2 class="text-lg font-semibold text-gray-700">Daily product Sales(Cumalative)</h2>
+        <p class="text-2xl font-bold text-orange-600 mt-2">{{ sums.product__name }}--> ${{ sums.sum }}</p>
+    </div>
+     {% endfor %}
+
+</div>
+{% endblock %}

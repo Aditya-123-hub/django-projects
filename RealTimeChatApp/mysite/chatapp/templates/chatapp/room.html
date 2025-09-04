@@ -1,0 +1,71 @@
+{% extends 'chatapp/base.html' %}
+{% block body %}
+<!-- Display current chatroom name -->
+{{ chatroom.name }}
+
+<!-- Div where chat messages will appear -->
+<div id="chat-messages">
+    {% for message in messages %}
+    {{ message.user.username }} : {{ message.message_content }}<br>
+    {% endfor %}
+</div>
+
+<!-- Form to send a new message -->
+<form method="POST">
+    <input id="message-input" type="text" name="message" placeholder="Enter message">
+    <button id="send-button" type="submit">Send</button>
+</form>
+
+<!-- Pass chatroom slug and username safely to JS -->
+{{ chatroom.slug|json_script:"json-chatroomname" }}
+{{ request.user.username|json_script:"json-username" }}
+
+<script>
+    // Parse chatroom name and username from template
+    const ChatRoomName = JSON.parse(document.getElementById('json-chatroomname').textContent);
+    const username = JSON.parse(document.getElementById('json-username').textContent);
+    console.log("username from template:", username) // debug
+
+    // Create WebSocket connection to server
+    const ChatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/' + ChatRoomName + '/'
+    );
+
+    // Handle incoming messages from server
+    ChatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data)
+        if(data.message){
+            // Append username and message to chat-messages div
+            let html = data.username + ':' + data.message + '</br>'
+            document.getElementById('chat-messages').innerHTML += html;
+        }
+        else{
+            alert("this message was empty")
+        }
+    };
+
+    // Log socket closure
+    ChatSocket.onclose = function(e) {
+        console.log('socket closed');
+    };
+
+    // Handle sending messages
+    document.getElementById('send-button').onclick = function(e){
+        e.preventDefault()  // prevent form from submitting normally
+        const MessageInput = document.getElementById('message-input')
+        const message = MessageInput.value
+        console.log(message) // debug
+
+        // Send message as JSON to WebSocket server
+        ChatSocket.send(JSON.stringify({
+            'message': message,
+            'username': username,
+            'room': ChatRoomName,
+        }))
+
+        // Clear input after sending
+        MessageInput.value = ""
+    }
+</script>
+
+{% endblock %}

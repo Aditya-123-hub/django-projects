@@ -1,0 +1,22 @@
+{% extends 'chatapp/base.html' %}
+
+{% block body %}
+<div class="text-center mb-8">
+    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Available Chat Rooms
+    </h1>
+    <p class="text-gray-400 mt-2">Join a room and start chatting with friends 🚀</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for room in rooms %}
+        <a href="{% url 'chatroom' room.slug %}"
+           class="p-6 rounded-2xl bg-gray-800 shadow-lg border border-gray-700 hover:scale-105 hover:border-purple-500 transition transform duration-200">
+            <h2 class="text-xl font-semibold text-white">{{ room.name }}</h2>
+            <p class="text-gray-400 text-sm mt-1">Click to join this room</p>
+        </a>
+    {% empty %}
+        <p class="text-gray-400 col-span-full text-center">No rooms available yet. Create one!</p>
+    {% endfor %}
+</div>
+{% endblock %}

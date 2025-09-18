@@ -12,6 +12,7 @@
 
 <!-- Form to send a new message -->
 <form method="POST">
+    {% csrf_token %}
     <input id="message-input" type="text" name="message" placeholder="Enter message">
     <button id="send-button" type="submit">Send</button>
 </form>

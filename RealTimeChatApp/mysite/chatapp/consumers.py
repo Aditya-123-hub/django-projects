@@ -15,10 +15,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-    async def disconnect(self):
+    async def disconnect(self,close_code):
         await self.channel_layer.group_discard(
-            self.channel_layer,
-            self.room_group_name
+            self.room_group_name,
+            self.channel_name
         )  
 
     async def receive(self,text_data):
@@ -26,10 +26,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message=data['message']
         username=data['username']
         room=data['room']
+        print("Data received from backend:", text_data)
 
         await self.channel_layer.group_send(
             self.room_group_name,{
-                'type':'chat_messages',
+                'type':'chat_message',
                 'message':message,
                 'username':username,
                 'room':room,
@@ -37,7 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         await self.save_message(username,room,message)
 
-    async def chat_messages(self,event):
+    async def chat_message(self,event):
         message=event['message']
         username=event['username']
         room=event['room']
@@ -50,9 +51,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @sync_to_async
-    def save_message(self,username,room,message):
-        user=User.objects.get(username=username)
-        room=ChatRoom.objects.get(slug=room)
+    def save_message(self, username, room, message):
+        try:
+            user = User.objects.filter(username=username).first()
+            room = ChatRoom.objects.get(slug=room)
+            if user:
+                ChatMessage.objects.create(user=user, room=room, message_content=message)
+            else:
+                print("Skipping save_message: user not found ->", username)
+        except Exception as e:
+            print("Save message error:", e)
 
-        ChatMessage.objects.create(user=user,room=room,message_content=message)    
             
